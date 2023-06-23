@@ -27,8 +27,7 @@ Install commands:
 - git clone https://github.com/lukebarbosa/api_laravel_passport_acl.git
 - composer update
 - configure .env
-- php artisan migrate
-- php artisan db:seed --class=UserSeeder
+- php artisan migrate --seed
 - php artisan serve
 
 ```
