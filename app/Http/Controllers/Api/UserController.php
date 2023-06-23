@@ -52,6 +52,12 @@ class UserController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        if (Gate::denies('create-user')) {
+            return response()->json([
+                'message' => 'Acesso negado!',
+            ], 403);
+        }
+
         $validator = Validator::make($request->all(), [
             'name' => 'required|string',
             'email' => 'required|email|unique:admins,email',
@@ -143,7 +149,7 @@ class UserController extends Controller
      * @param  int  $id
      * @return JsonResponse
      */
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, $id)
     {
         if (Gate::denies('edit-user')) {
             return response()->json([
@@ -155,9 +161,11 @@ class UserController extends Controller
 
         if (!empty($user)) {
             $validators = Validator::make($request->all(), [
-                'name'=> 'required|string',
-                'email'=> 'required|email'
+                'name'=> 'nullable|string',
+                'email'=> 'nullable|email'
             ])->safe()->all();
+
+            return $validators;
 
             $user->update($validators);
 

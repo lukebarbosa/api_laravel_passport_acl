@@ -21,19 +21,30 @@ class FinancialLoginController extends Controller
             'email' => 'required|email|unique:financials,email',
             'password' => 'required|min:8',
             'confirm-password' => 'required|same:password',
+            'level' => 'required|in:level 1,level 2',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
-                'error' => $validator->errors()
+                'error' => $validator->errors(),
+                'levels' => ['level 1', 'level 2']
             ], 422);
         }
 
-        Financial::create([
-            'name' => $validator->validated()['name'],
-            'email' => $validator->validated()['email'],
-            'password' => bcrypt($validator->validated()['password'])
-        ]);
+        if ($validator->validated()['level'] == 'level 2') {
+            Financial::create([
+                'name' => $validator->validated()['name'],
+                'email' => $validator->validated()['email'],
+                'password' => bcrypt($validator->validated()['password']),
+                'level' => 2
+            ]);
+        } else {
+            Financial::create([
+                'name' => $validator->validated()['name'],
+                'email' => $validator->validated()['email'],
+                'password' => bcrypt($validator->validated()['password']),
+            ]);
+        }
 
         return Response()->json([
             'message' => 'Registrado com sucesso.'
@@ -57,7 +68,7 @@ class FinancialLoginController extends Controller
 
         if(Auth::guard('financial')->attempt(['email' => $request->email, 'password' => $request->password])){
             config(['auth.guards.api.provider' => 'financial']);
-            $token = Auth::guard('moderator')->user()->createToken('MyApp',['financial'])->accessToken;
+            $token = Auth::guard('financial')->user()->createToken('MyApp',['financial'])->accessToken;
 
             return response()->json([
                 'message' => 'Logado com sucesso.',
